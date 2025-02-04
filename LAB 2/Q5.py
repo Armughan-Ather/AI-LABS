@@ -1,97 +1,63 @@
 import random
 class Enviroment:
-    def __init__(self,rooms,patients,medicine_storage, nurse_stations,corridors, schedules):
-        self.rooms = rooms
-        self.patients = patients
-        self.medicine_storage = medicine_storage
-        self.nurse_stations = nurse_stations
-        self.corridors = corridors
-        self.locations = rooms+medicine_storage+nurse_stations+corridors
-        self.staff = bool(random.choice([True,False]))
-        self.schedules=schedules
+    def __init__(self,corridors,nurse_stations,patient_rooms,medicine_storage_areas,patients):
+        self.corridors=corridors
+        self.nurse_stations=nurse_stations
+        self.patient_rooms=patient_rooms
+        self.medicine_storage_areas=medicine_storage_areas
+        self.patients=patients
 
 
-class GoalBasedAgent:
-   def move_to(self, location):
-        if location in self.environment.locations:
-            print(f"Moving from {self.current_location} to {location}.")
-            self.current_location = location
+class goalBasedAgent:
+    def __init__(self,enviroment):
+        self.enviroment=enviroment
+    
+    def move_to(self,location):
+        if location in self.enviroment.patient_rooms or location in self.enviroment.corridors or location in self.enviroment.nurse_stations or location in self.enviroment.medicine_storage_areas:
+            print("Moving to : ",location)
             return True
         else:
-            print("Invalid destination, Not in my environment")
+            print("Location : {location} Not Found")
             return False
-   def pick_up_medicine(self, medicine):
-    if self.current_location != self.environment.medicine_storage[0]:
-        if(not self.move_to(self.environment.medicine_storage[0])):
+        
+    def pickup_medicine(self,medicine,storage):
+        if storage in self.enviroment.medicine_storage_areas:
+            if self.move_to(storage):
+
+                print("Picking up ",medicine," from ",storage)
+            return True
+        else:
+            print("Incorrect storage location")
             return False
-    self.carrying_medicine = medicine
-    print(f"Picked up medicine: {medicine}.")
-    return True
-   def scan_patient_id(self, patient_id):
-       print(f"Scanning patient ID: {patient_id}")
-
-       if patient_id in self.environment.patients:
-          print("Patient Identified")
-          return True
-       else:
-                    
-            self.alert_staff("UnIdentified Patient, Take action accordingly")
-            return False  
-   
-   def deliver_medicine(self, room, patient_id, medicine):
-
-      if not self.check_med_time(patient_id):
-        return False
-
-      if self.current_location == room and self.carrying_medicine:
-        print("Comming to deliver medicine")
-
-      else:
-        if not self.pick_up_medicine(medicine):
-           return False
-        if not self.move_to(room):
-           return False
-
-      if self.scan_patient_id(patient_id):
-         print(f"Delivered {self.carrying_medicine} to patient {patient_id} in {room}.")
-         self.carrying_medicine = None
-      else:
-         print("Patient ID mismatch. Cannot deliver medicine.")
-   
-   def alert_staff(self, message):
-    print(f"Alerting staff: {message}")
-   def check_staff(self):    
-        if not self.environment.staff:
-            self.alert_staff("Lack of Staff")
-
-   def check_med_time(self, patient_id):
-      current_time=random.choice(['morning', 'evening', 'night'])
-
-      if current_time not in self.environment.schedules[patient_id]:
-         self.alert_staff("It is "+current_time+". Giving medicine to patient "+patient_id)
-         return True
-      else:
-         return False
-
-          
-   def __init__(self, environment):
-        self.environment = environment
-        self.current_location = environment.corridors[0]
-        self.carrying_medicine = None
     
+    def scan_patientID(self,id):
+        print("Scanning Patient Identity...")
+        if id in self.enviroment.patients:
+            print(f"Patient with ID : {id} verified Successfully")
+            return True
+        else:
+            print(f"Verification of Patient with ID : {id} Failed")
+            return False
+    def alert_staff(self,message):
+        print(f"Alert for staff : {message}")
 
-def run_agent(agent, environment):
- agent.deliver_medicine("101", "1001", "Painkiller")
-schedules = {
- "1001": ["morning, night"],
- "1002": ["evening"]
-}
-environment = Enviroment(rooms=["101", "102"],
- patients=["1001", "1002"],
- medicine_storage=["storage_room"],
- nurse_stations=["nurse_station"], corridors=["Corridor1",
-"Corridor2"],
- schedules=schedules
-)
-agent = GoalBasedAgent(environment)
-run_agent(agent, environment)    
+    def deliver_medicine(self,patient_id,medicine,storage,room):
+        if self.scan_patientID(patient_id):
+            if self.pickup_medicine(medicine,storage):
+                if room in self.enviroment.patient_rooms:
+                    
+                    if self.move_to(room):
+
+
+                        print(f"Successfully delivered {medicine} To patient : {patient_id} in Room No : {room}")
+
+
+corridors=["Corridor1","Corridor2"]
+nurse_stations=["NS1","NS2"]
+patient_rooms=["PR1","PR2","PR3"]
+medicine_storage_areas=["MSA1","MSA2"]
+patients=["P1","P2","P3"]
+env=Enviroment(corridors,nurse_stations,
+patient_rooms,medicine_storage_areas,patients)
+Agent=goalBasedAgent(env)
+Agent.deliver_medicine("P1","Panadol","MSA1","PR1")            

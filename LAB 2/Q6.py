@@ -3,7 +3,7 @@ def fire_checker(var):
     if var=="fire":
         return ' 🔥 '
     else:
-        return '   '
+        return '     '
 class Enviroment:
     def __init__(self):
         self.grid={
